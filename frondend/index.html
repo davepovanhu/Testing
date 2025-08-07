@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subscription</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f6f6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: left;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .plans-wrapper {
+      background-color: #1c1c1c;
+      padding: 40px;
+      border-radius: 18px;
+      color: white;
+    }
+
+    .plans-wrapper > p {
+      margin-top: 0;
+      font-size: 16px;
+      color: #ccc;
+    }
+
+    .plans {
+      display: flex;
+      gap: 30px;
+      margin-top: 30px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .plan {
+      background-color: #fff;
+      border-radius: 16px;
+      padding: 25px 30px;
+      color: #000;
+      flex: 1;
+      min-width: 280px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .plan h3 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .price {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .per {
+      color: gray;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .plan ul {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 20px;
+    }
+
+    .plan ul li {
+      margin: 10px 0;
+      font-size: 15px;
+    }
+
+    .plan ul li span {
+      margin-right: 8px;
+    }
+
+    .btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      font-size: 14px;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Subscription</h1>
+  <div class="plans-wrapper">
+    <p>Unlock premium learning experiences with our tailored plans.</p>
+    <div class="plans">
+      <!-- Beginner -->
+      <div class="plan">
+        <h3>Beginner</h3>
+        <div class="price">USD50</div>
+        <div class="per">paid annually</div>
+        <button class="btn" onclick="startSubscription('Beginner', 50)">Get Started</button>
+        <ul>
+          <li><span>✅</span>Package benefit one</li>
+          <li><span>✅</span>Package benefit two</li>
+          <li><span>❌</span>Package benefit three</li>
+          <li><span>❌</span>Package benefit four</li>
+          <li><span>❌</span>Package benefit five</li>
+        </ul>
+      </div>
+
+      <!-- Standard -->
+      <div class="plan">
+        <h3>Standard</h3>
+        <div class="price">USD150</div>
+        <div class="per">paid annually</div>
+        <button class="btn" onclick="startSubscription('Standard', 150)">Get Started</button>
+        <ul>
+          <li><span>✅</span>Package benefit one</li>
+          <li><span>✅</span>Package benefit two</li>
+          <li><span>✅</span>Package benefit three</li>
+          <li><span>❌</span>Package benefit four</li>
+          <li><span>❌</span>Package benefit five</li>
+        </ul>
+      </div>
+
+      <!-- Pro -->
+      <div class="plan">
+        <h3>Pro</h3>
+        <div class="price">USD250</div>
+        <div class="per">paid annually</div>
+        <button class="btn" disabled>Your current plan</button>
+        <ul>
+          <li><span>✅</span>Package benefit one</li>
+          <li><span>✅</span>Package benefit two</li>
+          <li><span>✅</span>Package benefit three</li>
+          <li><span>✅</span>Package benefit four</li>
+          <li><span>✅</span>Package benefit five</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Adumo form -->
+<form id="adumoForm" action="https://staging-apiv3.adumoonline.com/product/payment/v1/initialisevirtual" method="POST" style="display:none;">
+  <input type="hidden" name="puid" value="c88e2edb-1604-4857-8487-43f0138c33ac">
+  <input type="hidden" name="MerchantID" value="9BA5008C-08EE-4286-A349-54AF91A621B0">
+  <input type="hidden" name="ApplicationID" value="23ADADC0-DA2D-4DAC-A128-4845A5D71293">
+  <input type="hidden" name="MerchantReference" id="MerchantReference">
+  <input type="hidden" name="Amount" id="Amount">
+  <input type="hidden" name="Token" id="Token">
+  <input type="hidden" name="txtCurrencyCode" value="ZAR">
+  <input type="hidden" name="RedirectSuccessfulURL" value="https://yourdomain.com/success.html">
+  <input type="hidden" name="RedirectFailedURL" value="https://yourdomain.com/failure.html">
+</form>
+
+<script>
+  async function startSubscription(planName, amount) {
+    try {
+      const response = await fetch('http://localhost:3000/api/initiate-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planName, amount: amount })
+      });
+
+      const data = await response.json();
+
+      if (data.token && data.merchantReference) {
+        document.getElementById('MerchantReference').value = data.merchantReference;
+        document.getElementById('Amount').value = amount;
+        document.getElementById('Token').value = data.token;
+        document.getElementById('adumoForm').submit();
+      } else {
+        alert('Failed to start payment. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      alert('Something went wrong. Please try again later.');
+    }
+  }
+</script>
+
+</body>
+</html>
