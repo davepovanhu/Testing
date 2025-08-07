@@ -175,7 +175,7 @@
 <script>
   async function startSubscription(planName, amount) {
     try {
-      const response = await fetch('http://localhost:3000/api/initiate-payment', {
+      const response = await fetch('https://testing-ejpq.onrender.com/api/initiate-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan: planName, amount: amount })
